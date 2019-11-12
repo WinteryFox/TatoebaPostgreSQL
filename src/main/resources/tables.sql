@@ -1,3 +1,13 @@
+BEGIN;
+
+DROP INDEX IF EXISTS sentences_index;
+
+DROP INDEX IF EXISTS links_index;
+
+DROP INDEX IF EXISTS audio_index;
+
+DROP INDEX IF EXISTS tags_index;
+
 DROP TABLE IF EXISTS sentences CASCADE;
 CREATE TABLE sentences
 (
@@ -36,4 +46,6 @@ CREATE TABLE tags
     sentence INT NOT NULL,
     tag TEXT NOT NULL,
     PRIMARY KEY (sentence, tag)
-)
+);
+
+END;

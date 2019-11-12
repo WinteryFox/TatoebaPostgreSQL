@@ -114,6 +114,11 @@ fun main() {
                                 ) +
                                 " rows into tags table"
                 )
+
+                println("Creating indices...")
+                connection.createStatement().use {
+                    it.execute(Main::class.java.getResource("/indices.sql").readText())
+                }
             }
 
     println("Done!")
