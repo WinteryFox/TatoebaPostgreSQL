@@ -2,6 +2,11 @@ package com.foxie.tatoebapostgresql
 
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
+import org.postgresql.copy.CopyManager
+import org.postgresql.core.BaseConnection
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.net.URL
 import java.sql.DriverManager
 
@@ -20,6 +25,30 @@ fun main() {
     println("Enter the password")
     val password = System.console()?.readPassword() ?: readLine()
 
+    println("Downloading and decompressing sentences...")
+    if (!File("sentences.csv").exists())
+        FileOutputStream("sentences.csv")
+                .write(
+                        downloadAndDecompress(URL("https://downloads.tatoeba.org/exports/sentences.tar.bz2"))
+                                .readBytes()
+                )
+
+    println("Downloading and decompressing sentence links...")
+    if (!File("links.csv").exists())
+        FileOutputStream("links.csv")
+                .write(
+                        downloadAndDecompress(URL("https://downloads.tatoeba.org/exports/links.tar.bz2"))
+                                .readBytes()
+                )
+
+    println("Downloading and decompressing audio info...")
+    if (!File("audio.csv").exists())
+        FileOutputStream("audio.csv")
+                .write(
+                        downloadAndDecompress(URL("https://downloads.tatoeba.org/exports/sentences_with_audio.tar.bz2"))
+                                .readBytes()
+                )
+
     DriverManager
             .getConnection("jdbc:postgresql://$ip/$database?user=$username&password=$password")
             .use { connection ->
@@ -28,31 +57,38 @@ fun main() {
                     it.execute(Main::class.java.getResource("/tables.sql").readText())
                 }
 
-                connection.autoCommit = false
+                val copy = CopyManager(connection as BaseConnection)
 
-                println("Downloading and inserting sentences...")
-                connection.prepareStatement("INSERT INTO sentences (id, lang, sentence) VALUES (?, ?, ?)")
-                        .use {
-                            downloadAndDecompress(URL("https://downloads.tatoeba.org/exports/sentences.tar.bz2"))
-                                    .use { stream ->
-                                        stream
-                                        .bufferedReader()
-                                            .forEachLine { line ->
-                                                val parts = line.split("\t")
+                println("Inserting sentences...")
+                println(
+                        "Inserted " +
+                                copy.copyIn(
+                                        "COPY sentences(id, lang, sentence) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        FileInputStream("sentences.csv")
+                                ) +
+                                " rows into sentences table"
+                )
 
-                                                it.setInt(1, parts[0].toInt())
-                                                it.setString(2, parts[1])
-                                                it.setString(3, parts[2])
-                                                it.addBatch()
-                                            }
-                                    }
+                println("Inserting sentence links...")
+                println(
+                        "Inserted " +
+                                copy.copyIn(
+                                        "COPY links(source, translation) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        FileInputStream("links.csv")
+                                ) +
+                                " rows into links table"
+                )
 
-                            it.executeBatch()
-                            connection.commit()
-                        }
+                println("Inserting audio info...")
+                println(
+                        "Inserted " +
+                                copy.copyIn(
+                                        "COPY audio(sentence, username, license, attribution) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        FileInputStream("audio.csv")
+                                ) +
+                                " rows into audio info table"
+                )
             }
-
-    // https://jdbc.postgresql.org/documentation/publicapi/org/postgresql/copy/CopyManager.html
 
     println("Done!")
 }
