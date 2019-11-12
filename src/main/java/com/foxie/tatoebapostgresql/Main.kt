@@ -49,6 +49,14 @@ fun main() {
                                 .readBytes()
                 )
 
+    println("Downloading and decompressing tag info...")
+    if (!File("tags.csv").exists())
+        FileOutputStream("tags.csv")
+                .write(
+                        downloadAndDecompress(URL("https://downloads.tatoeba.org/exports/tags.tar.bz2"))
+                                .readBytes()
+                )
+
     DriverManager
             .getConnection("jdbc:postgresql://$ip/$database?user=$username&password=$password")
             .use { connection ->
@@ -63,7 +71,7 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY sentences(id, lang, sentence) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        "COPY sentences FROM STDIN CSV DELIMITER E'\t' QUOTE '\\'",
                                         FileInputStream("sentences.csv")
                                 ) +
                                 " rows into sentences table"
@@ -73,7 +81,7 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY links(source, translation) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        "COPY links FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
                                         FileInputStream("links.csv")
                                 ) +
                                 " rows into links table"
@@ -83,10 +91,27 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY audio(sentence, username, license, attribution) FROM STDIN CSV DELIMITER '\t' QUOTE '\\'",
+                                        "COPY tmp FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
                                         FileInputStream("audio.csv")
                                 ) +
-                                " rows into audio info table"
+                                " rows into temporary audio table"
+                )
+                println(
+                        "Copied " +
+                                connection.prepareStatement(
+                                        "INSERT INTO audio (SELECT DISTINCT ON (sentence, username) * FROM tmp)"
+                                ).executeUpdate() +
+                                " rows into audio table"
+                )
+
+                println("Inserting tags...")
+                println(
+                        "Inserted " +
+                                copy.copyIn(
+                                        "COPY tags FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
+                                        FileInputStream("tags.csv")
+                                ) +
+                                " rows into tags table"
                 )
             }
 
