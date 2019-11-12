@@ -103,6 +103,7 @@ fun main() {
                                 ).executeUpdate() +
                                 " rows into audio table"
                 )
+                connection.prepareStatement("DROP TABLE tmp").executeUpdate()
 
                 println("Inserting tags...")
                 println(
