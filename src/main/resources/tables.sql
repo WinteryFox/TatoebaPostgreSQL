@@ -11,10 +11,27 @@ DROP INDEX IF EXISTS tags_index;
 DROP TABLE IF EXISTS sentences CASCADE;
 CREATE TABLE sentences
 (
-    id       INT  NOT NULL PRIMARY KEY,
+    id       INT      NOT NULL PRIMARY KEY,
     lang     TEXT,
-    sentence TEXT NOT NULL
+    sentence TEXT     NOT NULL,
+    tsv      TSVECTOR
 );
+
+DROP FUNCTION IF EXISTS sentences_search_trigger();
+CREATE FUNCTION sentences_search_trigger() RETURNS trigger AS
+$$
+begin
+    new.tsv := setweight(to_tsvector(coalesce(new.sentence, '')), 'D');
+    return new;
+end
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tsvectorupdate ON sentences;
+CREATE TRIGGER tsvectorupdate
+    BEFORE INSERT OR UPDATE
+    ON sentences
+    FOR EACH ROW
+EXECUTE PROCEDURE sentences_search_trigger();
 
 DROP TABLE IF EXISTS links;
 CREATE TABLE links
@@ -38,13 +55,13 @@ DROP TABLE IF EXISTS tmp;
 CREATE TABLE tmp AS
 SELECT *
 FROM audio
-                      WITH NO DATA;
+    WITH NO DATA;
 
 DROP TABLE IF EXISTS tags;
 CREATE TABLE tags
 (
-    sentence INT NOT NULL,
-    tag TEXT NOT NULL,
+    sentence INT  NOT NULL,
+    tag      TEXT NOT NULL,
     PRIMARY KEY (sentence, tag)
 );
 

@@ -71,7 +71,7 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY sentences FROM STDIN CSV DELIMITER E'\t' QUOTE '\\'",
+                                        "COPY sentences(id, lang, sentence) FROM STDIN CSV DELIMITER E'\t' QUOTE '\\'",
                                         FileInputStream("sentences.csv")
                                 ) +
                                 " rows into sentences table"
