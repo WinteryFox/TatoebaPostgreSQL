@@ -1,5 +1,7 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS textsearch_ja;
+
 DROP INDEX IF EXISTS sentences_index;
 
 DROP INDEX IF EXISTS links_index;
@@ -11,19 +13,25 @@ DROP INDEX IF EXISTS tags_index;
 DROP TABLE IF EXISTS sentences CASCADE;
 CREATE TABLE sentences
 (
-    id       INT      NOT NULL PRIMARY KEY,
+    id       INT  NOT NULL PRIMARY KEY,
     lang     TEXT,
-    sentence TEXT     NOT NULL,
+    sentence TEXT NOT NULL,
     tsv      TSVECTOR
 );
 
 DROP FUNCTION IF EXISTS sentences_search_trigger();
 CREATE FUNCTION sentences_search_trigger() RETURNS trigger AS
 $$
-begin
-    new.tsv := setweight(to_tsvector(coalesce(new.sentence, '')), 'D');
+BEGIN
+    IF (new.lang = 'eng') THEN
+        new.tsv := to_tsvector('english', coalesce(new.sentence, ''));
+    ELSEIF (new.lang = 'jpn') THEN
+        new.tsv := to_tsvector('japanese', coalesce(new.sentence, ''));
+    ELSE
+        new.tsv := to_tsvector(coalesce(new.sentence, ''));
+    END IF;
     return new;
-end
+END
 $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS tsvectorupdate ON sentences;
