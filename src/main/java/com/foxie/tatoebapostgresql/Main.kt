@@ -71,7 +71,7 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY sentences(id, lang, sentence) FROM STDIN CSV DELIMITER E'\t' QUOTE '\\'",
+                                        "COPY sentences(id, lang, sentence) FROM STDIN",
                                         FileInputStream("sentences.csv")
                                 ) +
                                 " rows into sentences table"
@@ -81,7 +81,7 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY links FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
+                                        "COPY links FROM STDIN",
                                         FileInputStream("links.csv")
                                 ) +
                                 " rows into links table"
@@ -91,25 +91,17 @@ fun main() {
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY tmp FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
+                                        "COPY audio FROM STDIN",
                                         FileInputStream("audio.csv")
                                 ) +
                                 " rows into temporary audio table"
                 )
-                println(
-                        "Copied " +
-                                connection.prepareStatement(
-                                        "INSERT INTO audio (SELECT DISTINCT ON (sentence, username) * FROM tmp)"
-                                ).executeUpdate() +
-                                " rows into audio table"
-                )
-                connection.prepareStatement("DROP TABLE tmp").executeUpdate()
 
                 println("Inserting tags...")
                 println(
                         "Inserted " +
                                 copy.copyIn(
-                                        "COPY tags FROM STDIN CSV DELIMITER E'\t' QUOTE E'\b'",
+                                        "COPY tags FROM STDIN",
                                         FileInputStream("tags.csv")
                                 ) +
                                 " rows into tags table"
