@@ -11,7 +11,7 @@ This tool requires the [textsearch_ja](https://github.com/oknj/textsearch_ja)
 extension to be installed. Without this extension, the Japanese full text search
 will not work.
 
-##### Installing [textsearch_ja](https://github.com/oknj/textsearch_ja)
+#### Installing [textsearch_ja](https://github.com/oknj/textsearch_ja)
 
 1. Install [Git](https://git-scm.com/downloads)
 2. Open any command line utility (CMD on Windows and Terminal on Linux and Mac)
