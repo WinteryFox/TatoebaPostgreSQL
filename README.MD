@@ -13,13 +13,14 @@ will not work.
 
 #### Installing [textsearch_ja](https://github.com/oknj/textsearch_ja)
 
-1. Install [Git](https://git-scm.com/downloads)
-2. Open any command line utility (CMD on Windows and Terminal on Linux and Mac)
-3. Run `git clone https://github.com/oknj/textsearch_ja`
-4. Run `cd textsearch_ja`
-5. Run `make`
-6. Run `make install`
-7. Done!
+*If you are on Windows, you need to install [MinGW](https://sourceforge.net/projects/mingw-w64/) to use make*
+
+1. Download [textsearch_ja](https://github.com/oknj/textsearch_ja) as ZIP and extract it
+2. Open any command line utility
+3. `cd` into the textsearch_ja folder
+4. Run `make`
+5. Run `make install`
+6. Done!
 
 ### Usage
 
@@ -30,3 +31,11 @@ will not work.
 5. Run the following command to run the tool `java -jar TatoebaPostgreSQL.jar`
 6. Follow the prompts on screen and then wait for it to install
 8. Done!
+
+### Example query
+
+```sql
+SELECT sentence FROM sentences WHERE tsv @@ to_tsquery('I like dogs!');
+```
+
+*Read more about [tsvector and tsquery](https://www.postgresql.org/docs/9.0/datatype-textsearch.html)*
