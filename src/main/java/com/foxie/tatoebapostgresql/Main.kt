@@ -23,7 +23,7 @@ fun main() {
     val username = readLine()
 
     println("Enter the password")
-    val password = System.console()?.readPassword() ?: readLine()
+    val password = readLine()
 
     println("Downloading and decompressing sentences...")
     if (!File("sentences.csv").exists())
@@ -58,7 +58,7 @@ fun main() {
                 )
 
     DriverManager
-            .getConnection("jdbc:postgresql://$ip/$database?user=$username&password=$password")
+            .getConnection("jdbc:postgresql://$ip/$database", username, password)
             .use { connection ->
                 println("Creating tables...")
                 connection.createStatement().use {
