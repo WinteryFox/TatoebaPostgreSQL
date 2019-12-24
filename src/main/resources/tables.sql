@@ -4,7 +4,9 @@ CREATE EXTENSION IF NOT EXISTS textsearch_ja;
 
 DROP INDEX IF EXISTS sentences_index;
 
-DROP INDEX IF EXISTS links_index;
+DROP INDEX IF EXISTS links_source_index;
+
+DROP INDEX IF EXISTS links_translation_index;
 
 DROP INDEX IF EXISTS audio_index;
 
