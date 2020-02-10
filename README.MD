@@ -1,3 +1,5 @@
+## This tool is outdated and no longer used in Jibiki, please refer to the docker setup instructions instead.
+
 # Tatoeba PostgreSQL Importer
 
 This is a small tool to import the sentences, links, audio and tags
